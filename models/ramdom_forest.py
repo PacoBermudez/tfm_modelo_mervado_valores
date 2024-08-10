@@ -1,9 +1,13 @@
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
 import pandas as pd
+from src.config import save_model_params
 
-def model_ramdom_forest(param_distributions, X, Y, feature_set):
+
+def model_ramdom_forest(param_distributions, X, feature_set, nombre_modelo):
     model = RandomForestRegressor(random_state=42)
+
+    print("Model")
     random_search = RandomizedSearchCV(
         estimator=model,
         param_distributions=param_distributions,
@@ -28,6 +32,8 @@ def model_ramdom_forest(param_distributions, X, Y, feature_set):
     results_df[relevant_columns].to_excel("Resultado_ramdon_forest.xlsx")
 
     best_model = random_search.best_estimator_
+
+    save_model_params(best_model, nombre_modelo)
 
 
     return best_model

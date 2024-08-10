@@ -1,7 +1,7 @@
 import lightgbm as lgb
+from src.config import save_model_params
 
-
-def model_lgbmregressor(X,feature_set):
+def model_lgbmregressor(X, feature_set, nombre_modelo):
 
     model = lgb.LGBMRegressor(
     n_estimators=2000,
@@ -16,5 +16,7 @@ def model_lgbmregressor(X,feature_set):
     X[feature_set],
     X["target"]
     )
+
+    save_model_params(model, nombre_modelo)
 
     return model 
