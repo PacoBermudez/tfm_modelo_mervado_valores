@@ -9,7 +9,7 @@ python -m pip install "tensorflow<2.11"
 python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
 ```
 
-# 1. Descarga de datos  [Descarga de datos](https://github.com/PacoBermudez/tfm_modelo_mervado_valores/blob/main/download_data.py)
+# 1. [Descarga de datos](https://github.com/PacoBermudez/tfm_modelo_mervado_valores/blob/main/download_data.py)
 
 Para realizar la descarga de datos directamente desde numerai hay que ejecutar el script:
 
