@@ -1,4 +1,4 @@
-# tfm_modelo_mervado_valores
+# Predicción mercado valores por Numerai
 
 Para instalar tensorflow se han seguido las especificaciones de la página oficial para windows:
 ```
