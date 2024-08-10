@@ -16,7 +16,7 @@ def model_ramdom_forest(param_distributions, X, Y, feature_set):
     )
     random_search.fit(
         X[feature_set],
-        Y["target"]
+        X["target"]
         )
     
     results = random_search.cv_results_

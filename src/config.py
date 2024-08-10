@@ -40,3 +40,26 @@ def load_validation_data(feature_set, train):
 
     return validation
 
+
+def save_model_params(model, nombre_modelo):
+    import os
+
+    nombre_carpeta = 'pesos_modelos'
+
+    # Verifica si la carpeta ya existe
+    if not os.path.exists(nombre_carpeta):
+        # Crea la carpeta si no existe
+        os.makedirs(nombre_carpeta)
+        print(f'Carpeta "{nombre_carpeta}" creada.')
+    else:
+        print(f'La carpeta "{nombre_carpeta}" ya existe.')
+    
+    # Obtener los parámetros del modelo
+    import pickle
+
+    # Guardar el modelo en un archivo
+    with open(f'{nombre_carpeta}/{nombre_modelo}_model.pkl', 'wb') as f:
+        pickle.dump(model, f)
+
+    print("Modelo de regresión lineal guardado en 'linear_regression_model.pkl'.")
+
