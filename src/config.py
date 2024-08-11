@@ -66,3 +66,13 @@ def save_model_params(model, nombre_modelo):
 
     print("Modelo de regresión lineal guardado en 'linear_regression_model.pkl'.")
 
+def load_model(nombre_modelo):
+    import pickle
+
+    # Cargar el modelo desde el archivo
+    with open(f'pesos_modelos/{nombre_modelo}_model.pkl', 'rb') as f:
+        loaded_model = pickle.load(f)
+
+    print(f"Modelo de {nombre_modelo} cargado desde '{nombre_modelo}.pkl'.")
+
+    return loaded_model

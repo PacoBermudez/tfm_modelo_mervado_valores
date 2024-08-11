@@ -2,6 +2,7 @@
 .env
 *.csv
 *.xlsx
+*.pkl
 #Carpertas
 v4.3
 datos_balanceados
