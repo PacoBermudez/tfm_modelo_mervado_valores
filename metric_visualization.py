@@ -1,8 +1,15 @@
 from numerai_tools.scoring import numerai_corr, correlation_contribution
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import pandas as pd
+import os
+import matplotlib.pyplot as plt
 
-def extract_metrics(validation, model, feature_set, nombre_modelo):
+def extract_metrics(validation, model, feature_set, nombre_modelo, directorio):
+
+    output_folder = directorio
+    os.makedirs(output_folder, exist_ok=True)
+
+
     validation["prediction"] = model.predict(validation[feature_set])
     validation[["era", "prediction", "target"]]
 
@@ -31,37 +38,51 @@ def extract_metrics(validation, model, feature_set, nombre_modelo):
 
 
     # Plot the per-era correlation
+    plt.figure(figsize=(8, 4))
     per_era_corr.plot(
-    title=f"Validation CORR {nombre_modelo}",
-    kind="bar",
-    figsize=(8, 4),
-    xticks=[],
-    legend=False,
-    snap=False
+        title=f"Validation CORR {nombre_modelo}",
+        kind="bar",
+        xticks=[],
+        legend=False
     )
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_folder, f"Validation_CORR_{nombre_modelo}.png"))
+
+    # Plot the per-era MMC
+    plt.figure(figsize=(8, 4))
     per_era_mmc.plot(
-    title=f"Validation MMC {nombre_modelo}",
-    kind="bar",
-    figsize=(8, 4),
-    xticks=[],
-    legend=False,
-    snap=False
+        title=f"Validation MMC {nombre_modelo}",
+        kind="bar",
+        xticks=[],
+        legend=False
     )
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_folder, f"Validation_MMC_{nombre_modelo}.png"))
+
+    # Plot the cumulative validation CORR
+    plt.figure(figsize=(8, 4))
     per_era_corr.cumsum().plot(
-    title=f"Cumulative Validation CORR {nombre_modelo}",
-    kind="line",
-    figsize=(8, 4),
-    legend=False
+        title=f"Cumulative Validation CORR {nombre_modelo}",
+        kind="line",
+        legend=False
     )
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_folder, f"Cumulative_Validation_CORR_{nombre_modelo}.png"))
+
+    # Plot the cumulative validation MMC
+    plt.figure(figsize=(8, 4))
     per_era_mmc.cumsum().plot(
-    title=f"Cumulative Validation MMC {nombre_modelo}",
-    kind="line",
-    figsize=(8, 4),
-    legend=False
+        title=f"Cumulative Validation MMC {nombre_modelo}",
+        kind="line",
+        legend=False
     )
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_folder, f"Cumulative_Validation_MMC_{nombre_modelo}.png"))
 
-    print(y_pred)
+    # Mostrar los gráficos
+    plt.show()
 
+    return y_pred
     # y_pred.plot(
     # title=f"Cumulative Validation MMC {nombre_modelo}",
     # kind="line",

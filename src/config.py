@@ -10,6 +10,16 @@ def load_features(tipo_dataset):
     return feature_set
 
 
+def load_train_data(feature_set):
+
+    df = pd.read_parquet(
+        f"v4.3/train_int8.parquet",
+        columns=["era", "target"] + feature_set
+            )
+    
+    return df
+
+
 def load_balanced_data(feature_set):
 
     df = pd.read_parquet(
@@ -64,7 +74,7 @@ def save_model_params(model, nombre_modelo):
     with open(f'{nombre_carpeta}/{nombre_modelo}_model.pkl', 'wb') as f:
         pickle.dump(model, f)
 
-    print("Modelo de regresión lineal guardado en 'linear_regression_model.pkl'.")
+    print(f"Modelo de regresión lineal guardado en {nombre_modelo}.pkl'.")
 
 def load_model(nombre_modelo):
     import pickle
