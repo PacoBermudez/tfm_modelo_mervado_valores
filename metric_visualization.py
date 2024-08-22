@@ -60,3 +60,12 @@ def extract_metrics(validation, model, feature_set, nombre_modelo):
     legend=False
     )
 
+    print(y_pred)
+
+    # y_pred.plot(
+    # title=f"Cumulative Validation MMC {nombre_modelo}",
+    # kind="line",
+    # figsize=(8, 4),
+    # legend=False
+    # )
+

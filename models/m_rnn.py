@@ -7,8 +7,8 @@ from tensorflow.keras.layers import SimpleRNN, Dense, Dropout
 def normalizar_datos(train, feature_set):
     scaler = StandardScaler()
 
-    features =  X[feature_set]
-    targets = X["target"]
+    features =  train[feature_set]
+    targets = train["target"]
 
     scaled_features = scaler.fit_transform(features)
 
@@ -27,7 +27,7 @@ def normalizar_datos(train, feature_set):
 
     return X,y
 
-def model_rnn(X,y):
+def model_rnn_estructura(X,y):
     model = Sequential()
 
     # Capa SimpleRNN
@@ -45,3 +45,12 @@ def model_rnn(X,y):
     model.compile(optimizer='adam', lloss='mean_squared_error', metrics=['mean_absolute_error'])
 
     model.fit(X, y, epochs=10, batch_size=32)
+
+    return model
+
+
+def model_rnn(train, feature_set):
+    X,y = normalizar_datos(train, feature_set)
+    model = model_rnn_estructura(X,y)
+
+    return model
