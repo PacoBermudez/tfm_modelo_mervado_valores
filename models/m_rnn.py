@@ -1,56 +1,99 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import SimpleRNN, Dense, Dropout
+from tensorflow.keras.layers import SimpleRNN, Dense
+from sklearn.model_selection import train_test_split
 
-def normalizar_datos(train, feature_set):
-    scaler = StandardScaler()
+# Cargar los datos de Numerai Signals
+data = pd.read_csv('numerai_signals_data.csv')  # Ajusta la ruta al archivo
 
-    features =  train[feature_set]
-    targets = train["target"]
+# Ordenar los datos por fecha y ticker
+data = data.sort_values(['ticker', 'date'])
 
-    scaled_features = scaler.fit_transform(features)
+# Escalar los features
+scaler = MinMaxScaler()
+scaled_features = scaler.fit_transform(data[['feature1', 'feature2', ...]])  # Ajusta según las columnas
 
-    # Configurar la ventana de tiempo para la RNN
-    look_back = 10  # Número de pasos atrás en la secuencia que la RNN considerará
-    X, y = [], []
+# Añadir las features escaladas al DataFrame
+data[['feature1', 'feature2', ...]] = scaled_features
 
-    for i in range(look_back, len(scaled_features)):
-        X.append(scaled_features[i-look_back:i])
-        y.append(targets[i])
+# Crear un diccionario para almacenar los datos de cada empresa
+companies = data['ticker'].unique()
+company_data = {company: data[data['ticker'] == company] for company in companies}
 
-    X, y = np.array(X), np.array(y)
+# Función para crear secuencias de datos para RNN y mantener un seguimiento de los tickers
+def create_sequences(data, ticker, time_steps=10):
+    X, y, tickers = [], [], []
+    for i in range(len(data) - time_steps):
+        X.append(data[i:(i + time_steps), :-1])  # Usar todas las columnas excepto la última (target)
+        y.append(data[i + time_steps, -1])       # Usar solo la última columna (target)
+        tickers.append(ticker)                   # Mantener el ticker correspondiente a la secuencia
+    return np.array(X), np.array(y), tickers
 
-    # Reshape para que sea compatible con la entrada de la RNN
-    X = np.reshape(X, (X.shape[0], X.shape[1], X.shape[2]))
+# Crear las secuencias de entrenamiento para cada empresa
+X_train, y_train, tickers_train = [], [], []
+for company, company_df in company_data.items():
+    company_values = company_df[['feature1', 'feature2', ..., 'target']].values  # Ajusta según las columnas
+    X, y, tickers = create_sequences(company_values, company)
+    X_train.append(X)
+    y_train.append(y)
+    tickers_train.extend(tickers)
 
-    return X,y
+# Concatenar los datos de todas las empresas
+X_train = np.concatenate(X_train)
+y_train = np.concatenate(y_train)
+tickers_train = np.array(tickers_train)  # Convertir la lista de tickers en un array
 
-def model_rnn_estructura(X,y):
-    model = Sequential()
+# Dividir los datos en entrenamiento y validación manteniendo los tickers
+X_train, X_val, y_train, y_val, tickers_train, tickers_val = train_test_split(
+    X_train, y_train, tickers_train, test_size=0.2, random_state=42
+)
 
-    # Capa SimpleRNN
-    model.add(SimpleRNN(units=50, return_sequences=True, input_shape=(X.shape[1], X.shape[2])))
-    model.add(Dropout(0.2))
-
-    # Segunda capa SimpleRNN
-    model.add(SimpleRNN(units=50))
-    model.add(Dropout(0.2))
-
-    # Capa de salida
-    model.add(Dense(units=1, activation='linear'))  # 'sigmoid' para predicción binaria
-
-    # Compilar el modelo
-    model.compile(optimizer='adam', lloss='mean_squared_error', metrics=['mean_absolute_error'])
-
-    model.fit(X, y, epochs=10, batch_size=32)
-
-    return model
+# Verificar las formas de los datos
+print(f"Forma de X_train: {X_train.shape}")
+print(f"Forma de y_train: {y_train.shape}")
+print(f"Tickers de entrenamiento: {len(tickers_train)}")
 
 
-def model_rnn(train, feature_set):
-    X,y = normalizar_datos(train, feature_set)
-    model = model_rnn_estructura(X,y)
+model = Sequential()
+model.add(SimpleRNN(50, input_shape=(X_train.shape[1], X_train.shape[2]), return_sequences=True))
+model.add(SimpleRNN(50))
+model.add(Dense(1))  # Salida única por empresa
 
-    return model
+# Compilar el modelo
+model.compile(optimizer='adam', loss='mse')
+
+# Entrenar el modelo
+history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_val, y_val))
+
+# Evaluar el modelo en los datos de validación
+loss = model.evaluate(X_val, y_val)
+print(f"Loss en validación: {loss}")
+
+
+
+predictions = model.predict(X_val)
+
+# Crear un DataFrame para visualizar las predicciones con sus tickers correspondientes
+results = pd.DataFrame({
+    'Ticker': tickers_val,
+    'Real': y_val,
+    'Predicción': predictions.flatten()
+})
+
+# Mostrar algunas filas de resultados
+print(results.head())
+
+# Graficar resultados de una empresa específica
+import matplotlib.pyplot as plt
+
+# Seleccionar un ticker para graficar
+selected_ticker = 'AAPL'  # Cambia según el ticker de interés
+ticker_results = results[results['Ticker'] == selected_ticker]
+
+plt.plot(ticker_results['Real'], label='Real')
+plt.plot(ticker_results['Predicción'], label='Predicción')
+plt.title(f'Resultados para {selected_ticker}')
+plt.legend()
+plt.show()

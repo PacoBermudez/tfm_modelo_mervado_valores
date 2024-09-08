@@ -20,6 +20,35 @@ def load_train_data(feature_set):
     return df
 
 
+def load_validation_benchmarck():
+
+    df = pd.read_parquet(
+        f"v4.3/validation_benchmark_models.parquet",
+        
+            )
+    
+    return df
+
+def load_validation_examples():
+
+    df = pd.read_parquet(
+        f"v4.3/validation_example_preds.parquet",
+        
+            )
+    
+    return df
+
+
+def load_predicciones(pred_modelo):
+
+    df = pd.read_parquet(
+        pred_modelo,
+        
+            )
+    
+    return df
+
+
 def load_balanced_data(feature_set):
 
     df = pd.read_parquet(

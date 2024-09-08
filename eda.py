@@ -35,6 +35,9 @@ df_signal['Country'] = df_signal['feature_country'].map(PAISES)
 df_signal.columns
 
 # %%
+df_signal.head(5)
+
+# %%
 df_signal.info()
 
 # %%
@@ -54,12 +57,18 @@ columns_analisis=['date', 'Country','data_type','numerai_ticker','feature_impact
        'feature_adv_20d_factor', 'feature_market_cap_factor',
        'feature_price_factor', 'feature_earnings_yield_factor',
        'feature_dividend_yield_factor', 'feature_book_to_price_factor',
-       'feature_value_factor', 'feature_growth_factor', 'target',]
+       'feature_value_factor', 'feature_growth_factor', 'target_factor_neutral_20',]
 
 # %%
 df_analisis = df_signal[columns_analisis].copy()
 
 
+
+# %%
+df_analisis.groupby("data_type")["date"].min()
+
+# %%
+df_analisis.groupby("data_type")["date"].max()
 
 # %%
 
@@ -78,13 +87,14 @@ plt.gca().yaxis.set_major_formatter(formatter)
 # Añadir etiquetas a cada barra
 for bar in bars:
     yval = bar.get_height()
-    plt.text(bar.get_x() + bar.get_width()/2, yval, format_number(yval, None), ha='center', va='bottom')
+    plt.text(bar.get_x() + bar.get_width()/2, yval, format_number(yval, None), ha='center', va='bottom', fontsize=20)
 
 # Personalizar el gráfico
-plt.title('Tamaños de datasets')
-plt.xlabel('Sets')
-plt.ylabel('Frecuencia')
-plt.xticks(rotation=90)
+plt.title('Tamaños de datasets', fontsize=40)
+plt.xlabel('Sets', fontsize=40)
+plt.ylabel('Frecuencia', fontsize=40)
+plt.xticks(rotation=90, fontsize=25)
+plt.yticks(fontsize=25)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 
 output_path = 'graficos_eda/distribucion_datasets.jpg'
@@ -95,7 +105,7 @@ plt.savefig(output_path, dpi=300)
 plt.show()
 
 # %%
-df_analisis['target_str'] = df_analisis['target'].astype(str)
+df_analisis['target_str'] = df_analisis['target_factor_neutral_20'].astype(str)
 country_counts = df_analisis['target_str'].value_counts()
 
 plt.figure(figsize=(20, 20))
@@ -108,13 +118,14 @@ plt.gca().yaxis.set_major_formatter(formatter)
 # Añadir etiquetas a cada barra
 for bar in bars:
     yval = bar.get_height()
-    plt.text(bar.get_x() + bar.get_width()/2, yval, format_number(yval, None), ha='center', va='bottom', rotation=0)
+    plt.text(bar.get_x() + bar.get_width()/2, yval, format_number(yval, None), ha='center', va='bottom', rotation=0, fontsize=20)
 
 # Personalizar el gráfico
-plt.title('Distribucion Target')
-plt.xlabel('Target')
-plt.ylabel('Frecuencia')
-plt.xticks(rotation=90)
+plt.title('Distribucion Target', fontsize=80)
+plt.xlabel('Target', fontsize=60)
+plt.ylabel('Frecuencia', fontsize=60)
+plt.xticks(rotation=90, fontsize=20)
+plt.yticks(fontsize=20)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 
 output_path = 'graficos_eda/distribucion_target.jpg'
@@ -134,7 +145,7 @@ paises["% Acumulado"]=paises["% pais"].cumsum()
 paises.head(9)
 
 # %%
-balanceo_datos = df_analisis.groupby(["data_type","target"])["numerai_ticker"].count().reset_index()
+balanceo_datos = df_analisis.groupby(["data_type","target_factor_neutral_20"])["numerai_ticker"].count().reset_index()
 balanceo_datos
 
 # %%
@@ -151,13 +162,14 @@ plt.gca().yaxis.set_major_formatter(formatter)
 # Añadir etiquetas a cada barra
 for bar in bars:
     yval = bar.get_height()
-    plt.text(bar.get_x() + bar.get_width(), yval, format_number(yval, None), ha='center', va='bottom',rotation=45)
+    plt.text(bar.get_x() + bar.get_width(), yval, format_number(yval, None), ha='center', va='bottom',rotation=80, fontsize=14 )
 
 # Personalizar el gráfico
-plt.title('Frecuencia Paises')
-plt.xlabel('País')
-plt.ylabel('Frecuencia')
-plt.xticks(rotation=90)
+plt.title('Frecuencia Paises', fontsize=40)
+plt.xlabel('País', fontsize=30)
+plt.ylabel('Frecuencia', fontsize=30)
+plt.xticks(rotation=90, fontsize=17)
+plt.yticks( fontsize=20)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 
 output_path = 'graficos_eda/frecuencia_paises.jpg'
@@ -215,17 +227,20 @@ def generar_eda_empresa(df_analisis, empresa):
 
     #df['date'] = pd.to_datetime(df["date"])
     df_filtrado['date'] = pd.to_datetime(df_filtrado["date"])
-    df_filtrado['date'] = df_filtrado['date'].dt.strftime('%Y-%m-%d')
+    # df_filtrado['date'] = df_filtrado['date'].dt.strftime('%Y-%m-%d')
 
-    df_filtrado
+    # df_filtrado
 
-    df = df.merge(df_filtrado, on="date", how="left")
-    df['target'].interpolate(method='linear')
+    # df = df.merge(df_filtrado, on="date", how="left")
+    # df['target_factor_neutral_20'].interpolate(method='linear')
     df_filtrado.set_index('date', inplace=True)
 
-    df_filtrado["target_movil"] = df_filtrado["target"].rolling(5).mean()
+    #df_filtrado_describe =df_filtrado.describe()
+    #df_filtrado_describe.to_excel(f"Descriptivo_{empresa}.xlsx")
+
+    df_filtrado["target_movil"] = df_filtrado["target_factor_neutral_20"].rolling(5).mean()
     df_filtrado = df_filtrado.dropna(subset="target_movil")
-    df_filtrado=df_filtrado[["target","target_movil"]]
+    df_filtrado=df_filtrado[["target_factor_neutral_20","target_movil"]]
     fig, ax = plt.subplots(figsize=(12, 6))  # Crea la figura y el eje
 
     # Graficar los datos
@@ -245,7 +260,7 @@ def generar_eda_empresa(df_analisis, empresa):
 
     prueba = df_filtrado['target_movil']
 
-    results = seasonal_decompose(prueba, model='additive', extrapolate_trend='freq', period=16)
+    results = seasonal_decompose(prueba, model='additive', extrapolate_trend='freq', period=64)
     fig = results.plot()
 
     fig.suptitle(f'Descomposición Estacional de la Serie Temporal de {empresa}', fontsize=16)
@@ -284,27 +299,49 @@ def generar_eda_empresa(df_analisis, empresa):
     # Guardar la figura como imagen
     fig.savefig(f'graficos_eda/acf_pacf_{empresa}.png')  # Cambia el nombre del archivo y formato si es necesario
 
-    # Mostrar el gráfico
-    plt.show()
+    # # Mostrar el gráfico
+    # plt.show()
+    # df_filtrado.plot.bar(
+    # title="Análisis Variables en el tiempo",
+    # figsize=(16, 10),
+    # layout=(7,5),
+    # xticks=[],
+    # subplots=True,
+    # sharex=False,
+    # legend=False,
+    # snap=False
+    # )
+    # for ax in plt.gcf().axes:
+    #     ax.set_xlabel("")
+    #     ax.title.set_fontsize(11)
+    # plt.tight_layout(pad=1.5)
+    # plt.gcf().suptitle("Análisis Variables en el tiempo", fontsize=25)
+    # plt.savefig(f'graficos_eda/descriptivo_variables_{empresa}.png')
 
 
 # %%
-
-
+df_filtrado = df_analisis[df_analisis["numerai_ticker"].str.contains(empresa, na=False)]
+df_filtrado.items()
 
 # %%
-lista_top_five_sp500 = ["NVDA", "AAPL","MSFT","GOOGL","AMZN","TSLA"]
+df_filtrado.reset_index(inplace=True)
+
+# %%
+df_filtrado
+
+# %%
+lista_top_five_sp500 = ["GOOGL"]
+["NVDA", "AAPL","MSFT","GOOGL","AMZN","TSLA"]
 
 
 for empresa in lista_top_five_sp500:
     generar_eda_empresa(df_analisis, empresa)
-    
+
 
  # %%
  adfuller_test(prueba)
 
 # %%
-
 fig = plt.figure(figsize=(12,8))
 ax1 = fig.add_subplot(211)
 fig = sm.graphics.tsa.plot_acf(prueba, lags=40, ax=ax1)

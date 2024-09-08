@@ -9,3 +9,11 @@ datos_balanceados
 pesos_modelos
 signals
 __pycache__
+*.parquet
+*.pth
+*.txt
+*.png
+pesos_modelos
+graficos_eda
+graficos_eda_numerai
+resultados_modelos
